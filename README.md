@@ -3,6 +3,19 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 
 > **Companion tool:** [ResumeForge](https://resume-forge-cli.web.app/) — generate ATS-friendly resumes
 
+## Table of Contents
+
+- [Features (v1)](#features-v1)
+- [Commands](#commands)
+  - [`validate`](#validate)
+- [Milestones](#milestones)
+  - [M1 — CLI skeleton & section detection](#m1--cli-skeleton--section-detection)
+  - [M2 — Section scoring rubrics](#m2--section-scoring-rubrics)
+  - [M3 — Issue detection & severity classification](#m3--issue-detection--severity-classification)
+  - [M4 — JSON report output](#m4--json-report-output)
+  - [M5 — Colorized stdout summary](#m5--colorized-stdout-summary)
+  - [M6 — Polish & packaging](#m6--polish--packaging)
+
 ## Features (v1)
 
 - **Validate a resume provided as a `.txt` file**
@@ -60,3 +73,39 @@ Report saved: ./resumeforgelint-report-20260620-001700.json
 **Planned additions:**
 
 - `--format html` — generate an HTML report (future)
+
+## Milestones
+
+### M1 — CLI skeleton & section detection
+- [ ] Set up CLI entry point (`validate --input`)
+- [ ] Parse `.txt` input and split into raw lines
+- [ ] Implement fuzzy heading matcher with synonym sets
+- [ ] Return list of detected sections with line ranges
+
+### M2 — Section scoring rubrics
+- [ ] **Work Experience** rubric — quantified achievements, action verbs, date ranges, bullet structure
+- [ ] **Skills** rubric — keyword density, categorization, relevance signals
+- [ ] **Education** rubric — degree present, institution, dates, GPA/honors (optional)
+- [ ] **Summary/Profile** rubric — length, keyword alignment, clarity
+- [ ] **References** rubric — presence check only (optional section)
+- [ ] Score normalization (each section out of 20, total out of 100)
+
+### M3 — Issue detection & severity classification
+- [ ] Define issue catalog (critical / warning / info) per rubric
+- [ ] Attach issues to scored sections with short "why" explanations
+- [ ] Compute overall rating threshold (Good ≥ 80 / Needs Work ≥ 50 / Poor < 50)
+
+### M4 — JSON report output
+- [ ] Define standardized report schema (version, metadata, sections[], issues[], scores)
+- [ ] Serialize report and write to cwd with timestamped filename
+- [ ] Print report file path to stdout
+
+### M5 — Colorized stdout summary
+- [ ] Overall rating line with emoji + color
+- [ ] Per-section table with green/yellow/red and top issue per section
+- [ ] Graceful fallback when terminal doesn't support color
+
+### M6 — Polish & packaging
+- [ ] End-to-end integration test with sample resume
+- [ ] `pip install .` works and `resumeforgelint validate` is available on PATH
+- [ ] README examples verified against actual output
