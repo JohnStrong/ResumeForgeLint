@@ -36,7 +36,7 @@ Simple ATS (application tracking system) Resume/C.V validation tool
     - Profile/Summary
     - References
 
-## Commands
+## Commands (Planned)
 
 ### `validate`
 
