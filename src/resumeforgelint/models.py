@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -28,6 +29,15 @@ class Section:
     section_type: SectionType
     heading: str | None # None only for the implicit header section
     content: list[str]  # empty list if no content
+
+@dataclass
+class ScoringRubric:
+    """Represents a single rubric used to score a section"""
+    title: str
+    severity: Severity # True = passes, False = fails
+    scorer: Callable[[Section], bool]
+    message: str # issue message if check fails
+    points: int   # points deducted on failure
 
 @dataclass
 class ScoredSection:
