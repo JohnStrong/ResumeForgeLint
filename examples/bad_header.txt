@@ -1,0 +1,19 @@
+john.smith@email.com
+555-123-4567
+
+Summary
+Experienced software engineer with 8 years of backend development.
+
+Experience
+Amazon - Senior Software Engineer
+2020 - Present
+Built distributed systems at scale.
+
+Education
+BSc Computer Science, University of Edinburgh, 2016
+
+Skills
+Python, Java, AWS, Terraform, Docker
+
+References
+Available on request
