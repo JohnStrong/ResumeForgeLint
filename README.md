@@ -93,3 +93,31 @@ Overall: 🟡 Needs Work (62/100)
   Summary            🔴   6/20  ✖ too short, no keywords
   Header             🟢  20/20
 ```
+
+## Examples
+
+> **Note:** Output is subject to change as not all section scorers are implemented yet. Currently only the Header section is scored.
+
+### Good header (`examples/good_header.txt`)
+
+```bash
+$ resumeforgelint validate --input examples/good_header.txt
+```
+
+```
+Overall: 🔴 Poor (20/100)
+
+  Header             🟢  20/20
+```
+
+### Bad header (`examples/bad_header.txt`)
+
+```bash
+$ resumeforgelint validate --input examples/bad_header.txt
+```
+
+```
+Overall: 🔴 Poor (10/100)
+
+  Header             🟡  10/20  ✖ A Resume should contain the applicants full name at the start (top) of the document
+```
