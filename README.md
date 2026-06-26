@@ -35,7 +35,8 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 ### Header (20 points)
 - [x] Full name present on first line
 - [x] Email address present
-- [ ] Phone number present
+- [x] Phone number present
+- [ ] Phone number country code present (e.g. +1, +44)
 - [ ] LinkedIn URL present (optional, bonus)
 
 ### Work Experience (20 points)
