@@ -1,6 +1,6 @@
 
 SUMMARY = 'Overall: {emoji} {rating} ({total}/100)'
-SECTION = '  {name:<18} {emoji}  {score:>2}/20  {issue}'
+SECTION = '  {name:<18} {emoji}  {score:>2}/20  {issues}'
 
 class TemplateEngine:
     """Takes overall and section scores for a resume and renders a pretty text report."""

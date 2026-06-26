@@ -18,11 +18,11 @@ class TestTemplateEngine:
         result = (
             TemplateEngine()
             .summary({"emoji": "🟡", "rating": "Needs Work", "total": "62"})
-            .section({"name": "Skills", "emoji": "🟢", "score": 18, "issue": ""})
-            .section({"name": "Work Experience", "emoji": "🟡", "score": 14, "issue": "⚠ missing quantified achievements"})
-            .section({"name": "Education", "emoji": "🟢", "score": 16, "issue": ""})
-            .section({"name": "Summary", "emoji": "🔴", "score": 6, "issue": "✖ too short, no keywords"})
-            .section({"name": "References", "emoji": "—", "score": 0, "issue": "not found (optional)"})
+            .section({"name": "Skills", "emoji": "🟢", "score": 18, "issues": ""})
+            .section({"name": "Work Experience", "emoji": "🟡", "score": 14, "issues": "⚠ missing quantified achievements"})
+            .section({"name": "Education", "emoji": "🟢", "score": 16, "issues": ""})
+            .section({"name": "Summary", "emoji": "🔴", "score": 6, "issues": "✖ too short, no keywords"})
+            .section({"name": "References", "emoji": "—", "score": 0, "issues": "not found (optional)"})
             .render()
         )
         assert result == expected
@@ -33,8 +33,8 @@ class TestTemplateEngine:
         result = (
             template
             .summary({"emoji": "🟡", "rating": "Needs Work", "total": "62"})
-            .section({"name": "Skills", "emoji": "🟢", "score": 18, "issue": ""})
-            .section({"name": "Work Experience", "emoji": "🟡", "score": 14, "issue": "⚠ missing quantified achievements"})
+            .section({"name": "Skills", "emoji": "🟢", "score": 18, "issues": ""})
+            .section({"name": "Work Experience", "emoji": "🟡", "score": 14, "issues": "⚠ missing quantified achievements"})
             .render()
         )
         assert "Overall: 🟡 Needs Work (62/100)" in result
@@ -48,7 +48,7 @@ class TestTemplateEngine:
         result = (
             template
             .summary({"emoji": "🟢", "rating": "Good", "total": "85"})
-            .section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": ""})
+            .section({"name": "Skills", "emoji": "🟢", "score": 20, "issues": ""})
             .render()
         )
         assert "\n\n" in result
@@ -59,9 +59,9 @@ class TestTemplateEngine:
         result = (
             template
             .summary({"emoji": "🟢", "rating": "Good", "total": "80"})
-            .section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": ""})
-            .section({"name": "Education", "emoji": "🟢", "score": 20, "issue": ""})
-            .section({"name": "Experience", "emoji": "🟢", "score": 20, "issue": ""})
+            .section({"name": "Skills", "emoji": "🟢", "score": 20, "issues": ""})
+            .section({"name": "Education", "emoji": "🟢", "score": 20, "issues": ""})
+            .section({"name": "Experience", "emoji": "🟢", "score": 20, "issues": ""})
             .render()
         )
         lines = result.split("\n")
@@ -74,7 +74,7 @@ class TestTemplateEngine:
         result = (
             template
             .summary({"emoji": "🟢", "rating": "Good", "total": "80", "extra_key": "ignored"})
-            .section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": "", "unused": "value"})
+            .section({"name": "Skills", "emoji": "🟢", "score": 20, "issues": "", "unused": "value"})
             .render()
         )
         assert "Overall: 🟢 Good (80/100)" in result
@@ -85,12 +85,12 @@ class TestTemplateEngine:
         """POSITIVE: summary() and section() return self for method chaining."""
         template = TemplateEngine()
         assert template.summary({"emoji": "🟢", "rating": "Good", "total": "80"}) is template
-        assert template.section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": ""}) is template
+        assert template.section({"name": "Skills", "emoji": "🟢", "score": 20, "issues": ""}) is template
 
     def test_negative_render_without_summary_raises(self):
         """NEGATIVE: render without calling summary() raises ValueError."""
         template = TemplateEngine()
-        template.section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": ""})
+        template.section({"name": "Skills", "emoji": "🟢", "score": 20, "issues": ""})
         with pytest.raises(ValueError, match="SUMMARY"):
             template.render()
 
@@ -117,4 +117,4 @@ class TestTemplateEngine:
         """NEGATIVE: missing required key in section props raises KeyError with key name."""
         template = TemplateEngine()
         with pytest.raises(KeyError, match="score"):
-            template.section({"name": "Skills", "emoji": "🟢", "issue": ""})  # missing 'score'
+            template.section({"name": "Skills", "emoji": "🟢", "issues": ""})  # missing 'score'
