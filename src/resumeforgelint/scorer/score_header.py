@@ -11,11 +11,20 @@ _FULL_NAME_TWO_WORD_BASIC_PATTERN =  re.compile(
     re.IGNORECASE                                       # handles ALL CAPS resumes
 )
 
+EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+
 def _contains_full_name_at_start(section: Section) -> bool:
     if not section.content:
         return False
     return bool(_FULL_NAME_TWO_WORD_BASIC_PATTERN.match(section.content[0].strip()))
 
+def _contains_email(section: Section) -> bool:
+    if not section.content:
+        return False
+    for line in section.content[1:]:  # skip first line (reserved for name)
+        if EMAIL_PATTERN.search(line):
+            return True
+    return False
 
 RUBRICS: list[ScoringRubric] = [
     ScoringRubric(
@@ -24,6 +33,13 @@ RUBRICS: list[ScoringRubric] = [
         scorer=_contains_full_name_at_start,
         message="A Resume should contain the applicants full name at the start (top) of the document",
         points=10,
+    ),
+    ScoringRubric(
+        title="EmailAddressPresent",
+        severity=Severity.CRITICAL,
+        scorer=_contains_email,
+        message="Email address should be within the Resume heading",
+        points=11
     )
 ]
 
@@ -35,4 +51,4 @@ def score_header(section: Section) -> ScoredSection:
         if not result:
             points -= rubric.points
             issues.append(Issue(severity=rubric.severity, message=rubric.message))
-    return ScoredSection(section=section, score=points, issues=issues)
+    return ScoredSection(section=section, score=max(points, 0), issues=issues)

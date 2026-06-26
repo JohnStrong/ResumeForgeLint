@@ -25,15 +25,15 @@ class TestCli:
         """POSITIVE: validate with good header resume produces full score for header."""
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "good_header.txt"))
         assert result.returncode == 0
-        assert "20/20" in result.stdout
         assert "Header" in result.stdout
+        assert "20/20" in result.stdout
 
     def test_positive_validate_bad_header(self):
-        """POSITIVE: validate with bad header resume reports issue."""
+        """POSITIVE: validate with bad header resume reports issues."""
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_header.txt"))
         assert result.returncode == 0
-        assert "10/20" in result.stdout
-        assert "full name" in result.stdout.lower()
+        assert "0/20" in result.stdout
+        assert "✖ A Resume should contain the applicants full name at the start (top) of the document" in result.stdout
 
     def test_negative_no_command(self):
         """NEGATIVE: no command prints help and exits 1."""
