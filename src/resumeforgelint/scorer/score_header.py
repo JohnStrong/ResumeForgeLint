@@ -2,8 +2,14 @@ import re
 
 from resumeforgelint.models import ScoredSection, Section, ScoringRubric, Issue, Severity
 
-# only handles two-word names. Won't match "Mary Jane Watson" or "O'Brien" or hyphenated names... needs a fix
-_FULL_NAME_TWO_WORD_BASIC_PATTERN = re.compile(r"^[A-Z][a-z]+\s[A-Z][a-z]+$")
+
+_FULL_NAME_TWO_WORD_BASIC_PATTERN =  re.compile(
+    r"^(?:(?:Mr|Mrs|Miss|Ms|Dr|Prof)\.?\s+)?"           # optional prefix
+    r"[A-ZÀ-Ž][a-zà-ž'-]+"                              # first name (accents, hyphens, apostrophes)
+    r"(?:\s[A-ZÀ-Ž][a-zà-ž'-]+)+"                       # one or more additional name parts
+    r"(?:\s(?:Jr|Sr|II|III|IV|PhD|MD|Esq)\.?)?$",       # optional suffix
+    re.IGNORECASE                                       # handles ALL CAPS resumes
+)
 
 def _contains_full_name_at_start(section: Section) -> bool:
     if not section.content:
