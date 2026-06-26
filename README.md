@@ -6,6 +6,7 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 ## Table of Contents
 
 - [Features (v1)](#features-v1)
+- [Scoring Rubrics](#scoring-rubrics-work-in-progress)
 - [Commands](#commands)
   - [`validate`](#validate)
 
@@ -26,6 +27,41 @@ Simple ATS (application tracking system) Resume/C.V validation tool
   - Optional sections graded only if present:
     - Profile/Summary
     - References
+
+## Scoring Rubrics (Work in progress)
+
+> `[x]` denotes rubric is implemented
+
+### Header (20 points)
+- [x] Full name present on first line
+- [ ] Email address present
+- [ ] Phone number present
+- [ ] LinkedIn URL present (optional, bonus)
+
+### Work Experience (20 points)
+- [ ] Section present
+- [ ] Quantified achievements (numbers, percentages, metrics)
+- [ ] Action verbs at start of bullet points
+- [ ] Date ranges present for each role
+- [ ] Company and role title present
+
+### Skills (20 points)
+- [ ] Section present
+- [ ] Contains keywords (technical terms, tools, languages)
+- [ ] Minimum keyword count threshold
+- [ ] No excessive soft-skill filler
+
+### Education (20 points)
+- [ ] Section present
+- [ ] Degree type present (BSc, MSc, PhD, etc.)
+- [ ] Institution name present
+- [ ] Graduation date present
+
+### Summary/Profile (20 points)
+- [ ] Section present
+- [ ] Minimum length (not too short)
+- [ ] Maximum length (not too long)
+- [ ] Contains relevant keywords
 
 ## Commands
 
