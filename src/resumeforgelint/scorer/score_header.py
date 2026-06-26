@@ -1,4 +1,5 @@
 import re
+from collections.abc import Callable
 
 from resumeforgelint.models import ScoredSection, Section, ScoringRubric, Issue, Severity
 
@@ -13,18 +14,40 @@ _FULL_NAME_TWO_WORD_BASIC_PATTERN =  re.compile(
 
 EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
-def _contains_full_name_at_start(section: Section) -> bool:
+# Matches: 7-15 digit phone numbers with common separators (spaces, dots, dashes, parens)
+# Covers: US (555-123-4567), UK (07700 900000), EU (06 12 34 56 78), international (+353 1 234 5678)
+# Does NOT guard against: dates, zip codes, or other numeric sequences of similar length
+PHONE_PATTERN = re.compile(r"\+?[\d\s.\-()]{7,15}\d")
+
+def _match(section: Section, filter: Callable[[Section], list[str]], predicate: Callable[[str], bool]) -> bool:
     if not section.content:
         return False
-    return bool(_FULL_NAME_TWO_WORD_BASIC_PATTERN.match(section.content[0].strip()))
+    for line in filter(section):
+        res = predicate(line)
+        if res:
+            return True
+    return False        
+
+def _contains_full_name_at_start(section: Section) -> bool:
+    return _match(
+        section=section, 
+        filter=lambda s: [s.content[0].strip()],
+        predicate=lambda line: bool(_FULL_NAME_TWO_WORD_BASIC_PATTERN.match(line))
+    )
 
 def _contains_email(section: Section) -> bool:
-    if not section.content:
-        return False
-    for line in section.content[1:]:  # skip first line (reserved for name)
-        if EMAIL_PATTERN.search(line):
-            return True
-    return False
+    return _match(
+        section=section,
+        filter=lambda s: s.content[1:],
+        predicate=lambda line: bool(EMAIL_PATTERN.search(line))
+    )
+
+def _contains_phone_number(section: Section) -> bool:
+    return _match(
+        section=section,
+        filter=lambda s: s.content[1:],
+        predicate=lambda line: bool(PHONE_PATTERN.search(line))
+    )
 
 RUBRICS: list[ScoringRubric] = [
     ScoringRubric(
@@ -39,6 +62,13 @@ RUBRICS: list[ScoringRubric] = [
         severity=Severity.CRITICAL,
         scorer=_contains_email,
         message="Email address should be within the Resume heading",
+        points=11
+    ),
+    ScoringRubric(
+        title="PhoneNumberPresent",
+        severity=Severity.CRITICAL,
+        scorer=_contains_phone_number,
+        message="A Phone Number should be within the Resume heading",
         points=11
     )
 ]

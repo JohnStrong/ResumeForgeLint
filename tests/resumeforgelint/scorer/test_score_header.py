@@ -1,7 +1,7 @@
 import pytest
 
 from resumeforgelint.models import Section, SectionType, Severity
-from resumeforgelint.scorer.score_header import score_header, _contains_full_name_at_start, _contains_email
+from resumeforgelint.scorer.score_header import score_header, _contains_full_name_at_start, _contains_email, _contains_phone_number
 
 
 def _make_header(content: list[str]) -> Section:
@@ -207,43 +207,75 @@ class TestContainsFullNameAtStart:
 
 
 class TestScoreHeader:
-    def test_positive_valid_header_full_score(self):
-        """POSITIVE: header with valid name gets full 20 points and no issues."""
-        section = _make_header(["John Smith", "john@email.com", "555-1234"])
+    def test_positive_all_rubrics_pass(self):
+        """POSITIVE: header with name, email, and phone gets full 20 points."""
+        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
         result = score_header(section)
         assert result.score == 20
         assert result.issues == []
 
-    def test_negative_no_name_deducts_points_with_message(self):
-        """NEGATIVE: header without a name but with email deducts 11 points."""
-        section = _make_header(["555-1234", "john@email.com"])
+    def test_positive_section_preserved_in_result(self):
+        """POSITIVE: original section is preserved in the scored result."""
+        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
+        result = score_header(section)
+        assert result.section is section
+
+    def test_negative_no_name_deducts_11_points(self):
+        """NEGATIVE: header without a name but with email and phone deducts 11 points."""
+        section = _make_header(["London, UK", "john@email.com", "555-123-4567"])
         result = score_header(section)
         assert result.score == 9
         assert any("full name" in i.message.lower() for i in result.issues)
 
-    def test_negative_empty_header_reports_issue(self):
+    def test_negative_missing_email_deducts_11_points(self):
+        """NEGATIVE: header with name and phone but no email deducts 11 points."""
+        section = _make_header(["John Smith", "555-123-4567"])
+        result = score_header(section)
+        assert result.score == 9
+        assert len(result.issues) == 1
+        assert "email" in result.issues[0].message.lower()
+
+    def test_negative_missing_phone_deducts_11_points(self):
+        """NEGATIVE: header with name and email but no phone deducts 11 points."""
+        section = _make_header(["John Smith", "john@email.com", "London, UK"])
+        result = score_header(section)
+        assert result.score == 9
+        assert len(result.issues) == 1
+        assert "phone" in result.issues[0].message.lower()
+
+    def test_negative_only_name_present(self):
+        """NEGATIVE: header with name only, missing email and phone, clamps to 0."""
+        section = _make_header(["John Smith", "London, UK"])
+        result = score_header(section)
+        assert result.score == 0
+        assert len(result.issues) == 2
+        assert any("email" in i.message.lower() for i in result.issues)
+        assert any("phone" in i.message.lower() for i in result.issues)
+
+    def test_negative_empty_header_fails_all_rubrics(self):
         """NEGATIVE: empty header section fails all rubrics and clamps to 0."""
         section = _make_header([])
         result = score_header(section)
         assert result.score == 0
-        assert len(result.issues) == 2
+        assert len(result.issues) == 3
 
-    def test_positive_section_preserved_in_result(self):
-        """POSITIVE: original section is preserved in the scored result."""
-        section = _make_header(["Jane Doe", "jane@test.com"])
+    def test_negative_missing_all_clamps_to_zero(self):
+        """NEGATIVE: header missing name, email, and phone clamps to 0."""
+        section = _make_header(["London, UK"])
         result = score_header(section)
-        assert result.section is section
+        assert result.score == 0
+        assert len(result.issues) == 3
 
 
 class TestContainsEmail:
     def test_positive_email_on_second_line(self):
         """POSITIVE: email on second line is detected."""
-        section = _make_header(["John Smith", "john@email.com", "555-1234"])
+        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
         assert _contains_email(section) is True
 
     def test_positive_email_on_third_line(self):
         """POSITIVE: email on any line after the first is detected."""
-        section = _make_header(["John Smith", "555-1234", "john@email.com"])
+        section = _make_header(["John Smith", "555-123-4567", "john@email.com"])
         assert _contains_email(section) is True
 
     def test_positive_email_with_plus(self):
@@ -258,7 +290,7 @@ class TestContainsEmail:
 
     def test_negative_no_email(self):
         """NEGATIVE: header without email returns False."""
-        section = _make_header(["John Smith", "555-1234", "London, UK"])
+        section = _make_header(["John Smith", "555-123-4567", "London, UK"])
         assert _contains_email(section) is False
 
     def test_negative_empty_content(self):
@@ -277,25 +309,53 @@ class TestContainsEmail:
         assert _contains_email(section) is False
 
 
-class TestScoreHeaderWithEmail:
-    def test_positive_full_score_with_name_and_email(self):
-        """POSITIVE: header with name and email gets full 20 points."""
-        section = _make_header(["John Smith", "john@email.com", "555-1234"])
-        result = score_header(section)
-        assert result.score == 20
-        assert result.issues == []
+class TestContainsPhoneNumber:
+    def test_positive_us_format_dashes(self):
+        """POSITIVE: US phone with dashes is detected."""
+        section = _make_header(["John Smith", "555-123-4567"])
+        assert _contains_phone_number(section) is True
 
-    def test_negative_missing_email_deducts_11_points(self):
-        """NEGATIVE: header with name but no email deducts 11 points."""
-        section = _make_header(["John Smith", "555-1234"])
-        result = score_header(section)
-        assert result.score == 9
-        assert len(result.issues) == 1
-        assert "email" in result.issues[0].message.lower()
+    def test_positive_us_format_parens(self):
+        """POSITIVE: US phone with parens is detected."""
+        section = _make_header(["John Smith", "(555) 123-4567"])
+        assert _contains_phone_number(section) is True
 
-    def test_negative_missing_both_name_and_email_clamps_to_zero(self):
-        """NEGATIVE: header missing both name and email clamps to 0."""
-        section = _make_header(["555-1234"])
-        result = score_header(section)
-        assert result.score == 0
-        assert len(result.issues) == 2
+    def test_positive_us_format_dots(self):
+        """POSITIVE: US phone with dots is detected."""
+        section = _make_header(["John Smith", "555.123.4567"])
+        assert _contains_phone_number(section) is True
+
+    def test_positive_international_with_country_code(self):
+        """POSITIVE: international phone with country code is detected."""
+        section = _make_header(["John Smith", "+44 7700 900000"])
+        assert _contains_phone_number(section) is True
+
+    def test_positive_uk_format(self):
+        """POSITIVE: UK phone format is detected."""
+        section = _make_header(["John Smith", "07700 900000"])
+        assert _contains_phone_number(section) is True
+
+    def test_positive_phone_on_third_line(self):
+        """POSITIVE: phone on any line after first is detected."""
+        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
+        assert _contains_phone_number(section) is True
+
+    def test_negative_no_phone(self):
+        """NEGATIVE: header without phone returns False."""
+        section = _make_header(["John Smith", "john@email.com", "London, UK"])
+        assert _contains_phone_number(section) is False
+
+    def test_negative_empty_content(self):
+        """NEGATIVE: empty content returns False."""
+        section = _make_header([])
+        assert _contains_phone_number(section) is False
+
+    def test_negative_phone_on_first_line_only(self):
+        """NEGATIVE: phone only on the first line (name line) is not detected."""
+        section = _make_header(["555-123-4567"])
+        assert _contains_phone_number(section) is False
+
+    def test_negative_too_short(self):
+        """NEGATIVE: number too short to be a phone is not detected."""
+        section = _make_header(["John Smith", "12345"])
+        assert _contains_phone_number(section) is False
