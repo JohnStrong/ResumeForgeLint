@@ -108,13 +108,13 @@ class TestOutputTemplateV1:
             template.render()
 
     def test_negative_missing_summary_prop_raises(self):
-        """NEGATIVE: missing required key in summary props raises KeyError."""
+        """NEGATIVE: missing required key in summary props raises KeyError with key name."""
         template = OutputTemplateV1()
-        with pytest.raises(KeyError):
+        with pytest.raises(KeyError, match="total"):
             template.summary({"emoji": "🟢", "rating": "Good"})  # missing 'total'
 
     def test_negative_missing_section_prop_raises(self):
-        """NEGATIVE: missing required key in section props raises KeyError."""
+        """NEGATIVE: missing required key in section props raises KeyError with key name."""
         template = OutputTemplateV1()
-        with pytest.raises(KeyError):
-            template.section({"name": "Skills", "emoji": "🟢"})  # missing 'score' and 'issue'
+        with pytest.raises(KeyError, match="score"):
+            template.section({"name": "Skills", "emoji": "🟢", "issue": ""})  # missing 'score'
