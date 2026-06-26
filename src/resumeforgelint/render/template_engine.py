@@ -2,18 +2,18 @@
 SUMMARY = 'Overall: {emoji} {rating} ({total}/100)'
 SECTION = '  {name:<18} {emoji}  {score:>2}/20  {issue}'
 
-class OutputTemplateV1:
+class TemplateEngine:
     """Takes overall and section scores for a resume and renders a pretty text report."""
 
     def __init__(self):
         self.summary_text: str | None  = None
         self.sections: list[str] = []
 
-    def summary(self, props: dict[str, str]) -> "OutputTemplateV1":
+    def summary(self, props: dict[str, str]) -> "TemplateEngine":
         self.summary_text = SUMMARY.format(**props)
         return self
     
-    def section(self, props: dict[str, str]) -> "OutputTemplateV1":
+    def section(self, props: dict[str, str]) -> "TemplateEngine":
         self.sections.append(SECTION.format(**props))
         return self
     

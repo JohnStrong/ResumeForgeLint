@@ -1,9 +1,9 @@
 import pytest
 
-from resumeforgelint.render.output_template_v1 import OutputTemplateV1
+from resumeforgelint.render.template_engine import TemplateEngine
 
 
-class TestOutputTemplateV1:
+class TestTemplateEngine:
     def test_positive_exact_output_matches_expected(self):
         """POSITIVE: full render matches the exact expected multi-line output."""
         expected = (
@@ -16,7 +16,7 @@ class TestOutputTemplateV1:
             "  References         —   0/20  not found (optional)"
         )
         result = (
-            OutputTemplateV1()
+            TemplateEngine()
             .summary({"emoji": "🟡", "rating": "Needs Work", "total": "62"})
             .section({"name": "Skills", "emoji": "🟢", "score": 18, "issue": ""})
             .section({"name": "Work Experience", "emoji": "🟡", "score": 14, "issue": "⚠ missing quantified achievements"})
@@ -29,7 +29,7 @@ class TestOutputTemplateV1:
 
     def test_positive_full_render(self):
         """POSITIVE: renders complete report with summary and sections."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         result = (
             template
             .summary({"emoji": "🟡", "rating": "Needs Work", "total": "62"})
@@ -44,7 +44,7 @@ class TestOutputTemplateV1:
 
     def test_positive_summary_and_sections_separated_by_blank_line(self):
         """POSITIVE: summary and sections are separated by a blank line."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         result = (
             template
             .summary({"emoji": "🟢", "rating": "Good", "total": "85"})
@@ -55,7 +55,7 @@ class TestOutputTemplateV1:
 
     def test_positive_multiple_sections_on_separate_lines(self):
         """POSITIVE: each section appears on its own line."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         result = (
             template
             .summary({"emoji": "🟢", "rating": "Good", "total": "80"})
@@ -70,7 +70,7 @@ class TestOutputTemplateV1:
 
     def test_positive_extra_props_silently_ignored(self):
         """POSITIVE: extra keys in props dict not in template are silently ignored."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         result = (
             template
             .summary({"emoji": "🟢", "rating": "Good", "total": "80", "extra_key": "ignored"})
@@ -83,38 +83,38 @@ class TestOutputTemplateV1:
 
     def test_positive_chaining_returns_self(self):
         """POSITIVE: summary() and section() return self for method chaining."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         assert template.summary({"emoji": "🟢", "rating": "Good", "total": "80"}) is template
         assert template.section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": ""}) is template
 
     def test_negative_render_without_summary_raises(self):
         """NEGATIVE: render without calling summary() raises ValueError."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         template.section({"name": "Skills", "emoji": "🟢", "score": 20, "issue": ""})
         with pytest.raises(ValueError, match="SUMMARY"):
             template.render()
 
     def test_negative_render_without_sections_raises(self):
         """NEGATIVE: render without any section() calls raises ValueError."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         template.summary({"emoji": "🟢", "rating": "Good", "total": "80"})
         with pytest.raises(ValueError, match="SECTION"):
             template.render()
 
     def test_negative_render_empty_template_raises(self):
         """NEGATIVE: render on fresh template raises ValueError."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         with pytest.raises(ValueError):
             template.render()
 
     def test_negative_missing_summary_prop_raises(self):
         """NEGATIVE: missing required key in summary props raises KeyError with key name."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         with pytest.raises(KeyError, match="total"):
             template.summary({"emoji": "🟢", "rating": "Good"})  # missing 'total'
 
     def test_negative_missing_section_prop_raises(self):
         """NEGATIVE: missing required key in section props raises KeyError with key name."""
-        template = OutputTemplateV1()
+        template = TemplateEngine()
         with pytest.raises(KeyError, match="score"):
             template.section({"name": "Skills", "emoji": "🟢", "issue": ""})  # missing 'score'
