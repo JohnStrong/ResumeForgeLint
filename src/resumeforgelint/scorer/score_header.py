@@ -32,7 +32,7 @@ RUBRICS: list[ScoringRubric] = [
         severity=Severity.CRITICAL,
         scorer=_contains_full_name_at_start,
         message="A Resume should contain the applicants full name at the start (top) of the document",
-        points=10,
+        points=11,
     ),
     ScoringRubric(
         title="EmailAddressPresent",

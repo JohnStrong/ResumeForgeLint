@@ -215,10 +215,10 @@ class TestScoreHeader:
         assert result.issues == []
 
     def test_negative_no_name_deducts_points_with_message(self):
-        """NEGATIVE: header without a name but with email deducts 10 points."""
+        """NEGATIVE: header without a name but with email deducts 11 points."""
         section = _make_header(["555-1234", "john@email.com"])
         result = score_header(section)
-        assert result.score == 10
+        assert result.score == 9
         assert any("full name" in i.message.lower() for i in result.issues)
 
     def test_negative_empty_header_reports_issue(self):
