@@ -4,7 +4,7 @@ from pathlib import Path
 
 from resumeforgelint.parser.section_parser import parse
 from resumeforgelint.scorer.scorer import score
-from resumeforgelint.scorer.header_rubrics import RUBRICS as HEADER_RUBRICS
+from resumeforgelint.scorer import MAPPER
 from resumeforgelint.render.renderer import render
 
 
@@ -33,8 +33,8 @@ def main():
         # Score each section (only header scorer implemented for now)
         scored_sections = []
         for section in sections:
-            if section.section_type == "header":
-                scored_sections.append(score(section, HEADER_RUBRICS))
+            if section.section_type in MAPPER:
+                scored_sections.append(score(section, MAPPER[section.section_type]))
 
         if scored_sections:
             print(render(scored_sections))

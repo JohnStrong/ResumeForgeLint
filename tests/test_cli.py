@@ -22,18 +22,28 @@ class TestCli:
         assert "validate" in result.stdout
 
     def test_positive_validate_good_header(self):
-        """POSITIVE: validate with good header resume produces full score for header."""
+        """POSITIVE: validate with good header and experience produces expected output."""
+        expected = (
+            "Overall: 🔴 Poor (40/100)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Experience         🟢  20/20  \n"
+        )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "good_header.txt"))
         assert result.returncode == 0
-        assert "Header" in result.stdout
-        assert "20/20" in result.stdout
+        assert result.stdout == expected
 
     def test_positive_validate_bad_header(self):
-        """POSITIVE: validate with bad header resume reports issues."""
+        """POSITIVE: validate with bad header resume produces expected output."""
+        expected = (
+            "Overall: 🔴 Poor (20/100)\n"
+            "\n"
+            "  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document\n"
+            "  Experience         🟢  20/20  \n"
+        )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_header.txt"))
         assert result.returncode == 0
-        assert "0/20" in result.stdout
-        assert "✖ A Resume should contain the applicants full name at the start (top) of the document" in result.stdout
+        assert result.stdout == expected
 
     def test_negative_no_command(self):
         """NEGATIVE: no command prints help and exits 1."""
@@ -51,3 +61,14 @@ class TestCli:
         result = _run_cli("validate", "--input", "nonexistent.txt")
         assert result.returncode == 1
         assert "not found" in result.stdout
+
+    @pytest.mark.skip(reason="Parser does not yet emit empty sections for missing required sections. "
+                             "A resume missing Work Experience will not be penalised until the parser "
+                             "populates a null/empty Section for required types not found in the text.")
+    def test_negative_missing_required_section_still_scored(self):
+        """NEGATIVE: a resume missing a required section (e.g. Work Experience) should still
+        report it as scored with 0/20 in the output. Currently the parser only returns sections
+        it finds, so missing sections are silently ignored."""
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "good_header.txt"))
+        # Once fixed, a resume without Experience should show Experience 0/20
+        assert "Experience" in result.stdout
