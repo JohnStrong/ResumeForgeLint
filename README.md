@@ -54,10 +54,10 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [x] No excessive soft-skill filler
 
 ### Education (20 points)
-- [ ] Section present
-- [ ] Degree type present (BSc, MSc, PhD, etc.)
-- [ ] Institution name present
-- [ ] Graduation date present
+- [x] Section present
+- [x] Degree type present (BSc, MSc, PhD, etc.)
+- [x] Institution name present
+- [x] Graduation date present
 
 ### Summary/Profile (20 points)
 - [ ] Section present
