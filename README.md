@@ -80,39 +80,63 @@ resumeforgelint validate --input resume.txt
 **Example output:**
 
 ```
-Overall: 🟡 Needs Work (62/100)
+Overall: 🟢 Good (80/80)
 
-  Skills             🟢  18/20
-  Work Experience    🟡  14/20  ⚠ missing quantified achievements
-  Education          🟢  16/20
-  Summary            🔴   6/20  ✖ too short, no keywords
   Header             🟢  20/20
+  Experience         🟢  20/20
+  Education          🟢  20/20
+  Skills             🟢  20/20
 ```
 
 ## Examples
 
-> **Note:** Output is subject to change as not all section scorers are implemented yet. Currently only the Header section is scored.
+### Good resume (`examples/good_header.txt`)
 
-### Good header (`examples/good_header.txt`)
+All required sections present with complete information. Scores 80/80 (100%).
 
 ```bash
 $ resumeforgelint validate --input examples/good_header.txt
 ```
 
 ```
-Overall: 🔴 Poor (20/100)
+Overall: 🟢 Good (80/80)
 
   Header             🟢  20/20
+  Experience         🟢  20/20
+  Education          🟢  20/20
+  Skills             🟢  20/20
 ```
 
-### Bad header (`examples/bad_header.txt`)
+### Needs Work (`examples/needs_work.txt`)
+
+Has all sections but Education is missing degree type and institution. Experience lacks action verbs. Scores 62/80 (77%).
 
 ```bash
-$ resumeforgelint validate --input examples/bad_header.txt
+$ resumeforgelint validate --input examples/needs_work.txt
 ```
 
 ```
-Overall: 🔴 Poor (10/100)
+Overall: 🟡 Needs Work (62/80)
 
-  Header             🟡  10/20  ✖ A Resume should contain the applicants full name at the start (top) of the document
+  Header             🟢  20/20
+  Experience         🟢  17/20  ⚠ Bullet points should start with strong action verbs (e.g. built, delivered, improved)
+  Education          🔴   5/20  ✖ Education should include a degree type (e.g. BSc, MSc, PhD)
+  Skills             🟢  20/20
+```
+
+### Poor resume (`examples/bad_all.txt`)
+
+Missing name in header, no company/role or dates in experience, no technical keywords in skills, and no education section content. Scores 8/80 (10%).
+
+```bash
+$ resumeforgelint validate --input examples/bad_all.txt
+```
+
+```
+Overall: 🔴 Poor (8/80)
+
+  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document
+  Experience         🔴   0/20  ✖ Each role should include company name and role title
+  Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)
+  Education          🔴   0/20  ✖ Education section should not be empty
 ```
