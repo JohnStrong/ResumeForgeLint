@@ -1,6 +1,6 @@
 John Smith
 john.smith@email.com
-555-123-4567
++1 555-123-4567
 
 Summary
 Experienced software engineer with 8 years of backend development.

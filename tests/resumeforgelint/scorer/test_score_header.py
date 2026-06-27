@@ -208,47 +208,48 @@ class TestContainsFullNameAtStart:
 
 class TestScoreHeader:
     def test_positive_all_rubrics_pass(self):
-        """POSITIVE: header with name, email, and phone gets full 20 points."""
-        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
+        """POSITIVE: header with name, email, and phone with country code gets full 20 points."""
+        section = _make_header(["John Smith", "john@email.com", "+1 555-123-4567"])
         result = score_header(section)
         assert result.score == 20
         assert result.issues == []
 
     def test_positive_section_preserved_in_result(self):
         """POSITIVE: original section is preserved in the scored result."""
-        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
+        section = _make_header(["John Smith", "john@email.com", "+1 555-123-4567"])
         result = score_header(section)
         assert result.section is section
 
     def test_negative_no_name_deducts_11_points(self):
-        """NEGATIVE: header without a name but with email and phone deducts 11 points."""
-        section = _make_header(["London, UK", "john@email.com", "555-123-4567"])
+        """NEGATIVE: header without a name but with email and phone+code deducts 11 points."""
+        section = _make_header(["London, UK", "john@email.com", "+1 555-123-4567"])
         result = score_header(section)
         assert result.score == 9
         assert any("full name" in i.message.lower() for i in result.issues)
 
     def test_negative_missing_email_deducts_11_points(self):
-        """NEGATIVE: header with name and phone but no email deducts 11 points."""
-        section = _make_header(["John Smith", "555-123-4567"])
+        """NEGATIVE: header with name and phone+code but no email deducts 11 points."""
+        section = _make_header(["John Smith", "+44 7700 900000"])
         result = score_header(section)
         assert result.score == 9
         assert len(result.issues) == 1
         assert "email" in result.issues[0].message.lower()
 
-    def test_negative_missing_phone_deducts_11_points(self):
-        """NEGATIVE: header with name and email but no phone deducts 11 points."""
+    def test_negative_missing_phone_deducts_points(self):
+        """NEGATIVE: header with name and email but no phone deducts 11+5 points (phone + country code)."""
         section = _make_header(["John Smith", "john@email.com", "London, UK"])
         result = score_header(section)
-        assert result.score == 9
-        assert len(result.issues) == 1
-        assert "phone" in result.issues[0].message.lower()
+        assert result.score == 4
+        assert len(result.issues) == 2
+        assert any("phone" in i.message.lower() for i in result.issues)
+        assert any("country code" in i.message.lower() for i in result.issues)
 
     def test_negative_only_name_present(self):
-        """NEGATIVE: header with name only, missing email and phone, clamps to 0."""
+        """NEGATIVE: header with name only, missing email, phone, and country code, clamps to 0."""
         section = _make_header(["John Smith", "London, UK"])
         result = score_header(section)
         assert result.score == 0
-        assert len(result.issues) == 2
+        assert len(result.issues) == 3
         assert any("email" in i.message.lower() for i in result.issues)
         assert any("phone" in i.message.lower() for i in result.issues)
 
@@ -257,14 +258,14 @@ class TestScoreHeader:
         section = _make_header([])
         result = score_header(section)
         assert result.score == 0
-        assert len(result.issues) == 3
+        assert len(result.issues) == 4
 
     def test_negative_missing_all_clamps_to_zero(self):
-        """NEGATIVE: header missing name, email, and phone clamps to 0."""
+        """NEGATIVE: header missing name, email, phone, and country code clamps to 0."""
         section = _make_header(["London, UK"])
         result = score_header(section)
         assert result.score == 0
-        assert len(result.issues) == 3
+        assert len(result.issues) == 4
 
 
 class TestContainsEmail:

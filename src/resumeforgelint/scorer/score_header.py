@@ -18,6 +18,7 @@ EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 # Covers: US (555-123-4567), UK (07700 900000), EU (06 12 34 56 78), international (+353 1 234 5678)
 # Does NOT guard against: dates, zip codes, or other numeric sequences of similar length
 PHONE_PATTERN = re.compile(r"\+?[\d\s.\-()]{7,15}\d")
+COUNTRY_CODE_PATTERN = re.compile(r"\+\d{1,3}[\s.\-]")
 
 def _match(section: Section, filter: Callable[[Section], list[str]], predicate: Callable[[str], bool]) -> bool:
     if not section.content:
@@ -49,6 +50,13 @@ def _contains_phone_number(section: Section) -> bool:
         predicate=lambda line: bool(PHONE_PATTERN.search(line))
     )
 
+def _contains_country_code(section: Section) -> bool:
+    return _match(
+        section=section,
+        filter=lambda s: s.content[1:],
+        predicate=lambda line: bool(COUNTRY_CODE_PATTERN.search(line))
+    )
+
 RUBRICS: list[ScoringRubric] = [
     ScoringRubric(
         title="FullNameRubric",
@@ -70,6 +78,13 @@ RUBRICS: list[ScoringRubric] = [
         scorer=_contains_phone_number,
         message="A Phone Number should be within the Resume heading",
         points=11
+    ),
+    ScoringRubric(
+        title="PhoneCountryCodePresent",
+        severity=Severity.WARNING,
+        scorer=_contains_country_code,
+        message="Phone number should include a country code (e.g. +1, +44)",
+        points=5
     )
 ]
 
