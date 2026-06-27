@@ -47,10 +47,10 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [x] Company and role title present
 
 ### Skills (20 points)
-- [ ] Section present
-- [ ] Contains keywords (technical terms, tools, languages)
-- [ ] Minimum keyword count threshold
-- [ ] No excessive soft-skill filler
+- [x] Section present
+- [x] Contains keywords (technical terms, tools, languages)
+- [x] Minimum keyword count threshold
+- [x] No excessive soft-skill filler
 
 ### Education (20 points)
 - [ ] Section present
