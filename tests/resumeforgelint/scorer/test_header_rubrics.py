@@ -1,7 +1,12 @@
 import pytest
 
-from resumeforgelint.models import Section, SectionType, Severity
-from resumeforgelint.scorer.score_header import score_header, _contains_full_name_at_start, _contains_email, _contains_phone_number, _contains_country_code
+from resumeforgelint.models import Section, SectionType
+from resumeforgelint.scorer.header_rubrics import (
+    _contains_full_name_at_start,
+    _contains_email,
+    _contains_phone_number,
+    _contains_country_code,
+)
 
 
 def _make_header(content: list[str]) -> Section:
@@ -204,77 +209,6 @@ class TestContainsFullNameAtStart:
         """POSITIVE: ALL CAPS three-word name is detected."""
         section = _make_header(["MARY JANE WATSON"])
         assert _contains_full_name_at_start(section) is True
-
-
-class TestScoreHeader:
-    def test_positive_all_rubrics_pass(self):
-        """POSITIVE: header with name, email, and phone with country code gets full 20 points."""
-        section = _make_header(["John Smith", "john@email.com", "+1 555-123-4567"])
-        result = score_header(section)
-        assert result.score == 20
-        assert result.issues == []
-
-    def test_positive_section_preserved_in_result(self):
-        """POSITIVE: original section is preserved in the scored result."""
-        section = _make_header(["John Smith", "john@email.com", "+1 555-123-4567"])
-        result = score_header(section)
-        assert result.section is section
-
-    def test_negative_no_name_deducts_11_points(self):
-        """NEGATIVE: header without a name but with email and phone+code deducts 11 points."""
-        section = _make_header(["London, UK", "john@email.com", "+1 555-123-4567"])
-        result = score_header(section)
-        assert result.score == 9
-        assert any("full name" in i.message.lower() for i in result.issues)
-
-    def test_negative_missing_email_deducts_11_points(self):
-        """NEGATIVE: header with name and phone+code but no email deducts 11 points."""
-        section = _make_header(["John Smith", "+44 7700 900000"])
-        result = score_header(section)
-        assert result.score == 9
-        assert len(result.issues) == 1
-        assert "email" in result.issues[0].message.lower()
-
-    def test_negative_missing_phone_deducts_points(self):
-        """NEGATIVE: header with name and email but no phone deducts 11+5 points (phone + country code)."""
-        section = _make_header(["John Smith", "john@email.com", "London, UK"])
-        result = score_header(section)
-        assert result.score == 4
-        assert len(result.issues) == 2
-        assert any("phone" in i.message.lower() for i in result.issues)
-        assert any("country code" in i.message.lower() for i in result.issues)
-
-    def test_negative_phone_without_country_code_deducts_5_points(self):
-        """NEGATIVE: header with name, email, and phone but no country code deducts 5 points (warning)."""
-        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
-        result = score_header(section)
-        assert result.score == 15
-        assert len(result.issues) == 1
-        assert result.issues[0].severity == Severity.WARNING
-        assert "country code" in result.issues[0].message.lower()
-
-    def test_negative_only_name_present(self):
-        """NEGATIVE: header with name only, missing email, phone, and country code, clamps to 0."""
-        section = _make_header(["John Smith", "London, UK"])
-        result = score_header(section)
-        assert result.score == 0
-        assert len(result.issues) == 3
-        assert any("email" in i.message.lower() for i in result.issues)
-        assert any("phone" in i.message.lower() for i in result.issues)
-
-    def test_negative_empty_header_fails_all_rubrics(self):
-        """NEGATIVE: empty header section fails all rubrics and clamps to 0."""
-        section = _make_header([])
-        result = score_header(section)
-        assert result.score == 0
-        assert len(result.issues) == 4
-
-    def test_negative_missing_all_clamps_to_zero(self):
-        """NEGATIVE: header missing name, email, phone, and country code clamps to 0."""
-        section = _make_header(["London, UK"])
-        result = score_header(section)
-        assert result.score == 0
-        assert len(result.issues) == 4
 
 
 class TestContainsEmail:

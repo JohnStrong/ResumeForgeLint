@@ -3,7 +3,8 @@ import sys
 from pathlib import Path
 
 from resumeforgelint.parser.section_parser import parse
-from resumeforgelint.scorer.score_header import score_header
+from resumeforgelint.scorer.scorer import score
+from resumeforgelint.scorer.header_rubrics import RUBRICS as HEADER_RUBRICS
 from resumeforgelint.render.renderer import render
 
 
@@ -33,7 +34,7 @@ def main():
         scored_sections = []
         for section in sections:
             if section.section_type == "header":
-                scored_sections.append(score_header(section))
+                scored_sections.append(score(section, HEADER_RUBRICS))
 
         if scored_sections:
             print(render(scored_sections))
