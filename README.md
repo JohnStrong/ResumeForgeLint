@@ -1,6 +1,8 @@
 # ResumeForgeLint
 Simple ATS (application tracking system) Resume/C.V validation tool
 
+> **Documentation:** [resume-forge-lint.web.app](https://resume-forge-lint.web.app/)
+
 > **Companion tool:** [ResumeForge](https://resume-forge-cli.web.app/) — generate ATS-friendly resumes
 
 ## Table of Contents
