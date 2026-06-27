@@ -7,6 +7,18 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 
 > **Companion tool:** [ResumeForge](https://resume-forge-cli.web.app/) — generate ATS-friendly resumes
 
+## Installation
+
+```bash
+git clone git@github.com:JohnStrong/ResumeForgeLint.git
+cd ResumeForgeLint
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+Requires Python 3.10+.
+
 ## Table of Contents
 
 - [Features (v1)](#features-v1)
