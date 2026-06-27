@@ -27,6 +27,7 @@ Simple ATS (application tracking system) Resume/C.V validation tool
   - Optional sections graded only if present:
     - Profile/Summary
     - References
+  - Unrecognized sections (e.g. Projects, Volunteer Work, Certifications) are ignored and do not contribute to the score
 
 ## Scoring Rubrics (Work in progress)
 
