@@ -40,11 +40,11 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [ ] LinkedIn URL present (optional, bonus)
 
 ### Work Experience (20 points)
-- [ ] Section present
-- [ ] Quantified achievements (numbers, percentages, metrics)
-- [ ] Action verbs at start of bullet points
-- [ ] Date ranges present for each role
-- [ ] Company and role title present
+- [x] Section present
+- [x] Quantified achievements (numbers, percentages, metrics)
+- [x] Action verbs at start of bullet points
+- [x] Date ranges present for each role
+- [x] Company and role title present
 
 ### Skills (20 points)
 - [ ] Section present
