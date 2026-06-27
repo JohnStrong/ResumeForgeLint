@@ -1,0 +1,10 @@
+Experience
+Amazon - SDE
+2020 - Present
+Built distributed systems
+
+Skills
+Python, Java, AWS, Docker, Git
+
+Education
+BSc Computer Science, University of Edinburgh, 2020

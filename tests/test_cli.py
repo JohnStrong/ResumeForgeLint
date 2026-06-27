@@ -149,3 +149,17 @@ class TestCli:
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "header_only.txt"))
         assert result.returncode == 0
         assert result.stdout == expected
+
+    def test_positive_validate_no_header(self):
+        """POSITIVE: resume starting with a section heading scores header as 0/20."""
+        expected = (
+            "Overall: 🟡 Needs Work (60/80)\n"
+            "\n"
+            "  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document\n"
+            "  Experience         🟢  20/20  \n"
+            "  Skills             🟢  20/20  \n"
+            "  Education          🟢  20/20  \n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "no_header.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
