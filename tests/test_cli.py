@@ -24,10 +24,11 @@ class TestCli:
     def test_positive_validate_good_header(self):
         """POSITIVE: validate with good header and experience produces expected output."""
         expected = (
-            "Overall: 🔴 Poor (40/100)\n"
+            "Overall: 🟡 Needs Work (60/100)\n"
             "\n"
             "  Header             🟢  20/20  \n"
             "  Experience         🟢  20/20  \n"
+            "  Skills             🟢  20/20  \n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "good_header.txt"))
         assert result.returncode == 0
@@ -36,10 +37,11 @@ class TestCli:
     def test_positive_validate_bad_header(self):
         """POSITIVE: validate with bad header resume produces expected output."""
         expected = (
-            "Overall: 🔴 Poor (20/100)\n"
+            "Overall: 🔴 Poor (40/100)\n"
             "\n"
             "  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document\n"
             "  Experience         🟢  20/20  \n"
+            "  Skills             🟢  20/20  \n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_header.txt"))
         assert result.returncode == 0
