@@ -1,0 +1,12 @@
+John Smith
+john@email.com
++1 555-123-4567
+
+Experience
+Amazon - Senior Software Engineer
+2020 - Present
+Was responsible for backend systems
+Helped with distributed architecture
+
+Skills
+Python, Java, AWS, Docker, Kubernetes

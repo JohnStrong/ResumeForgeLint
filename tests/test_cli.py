@@ -101,6 +101,19 @@ class TestCli:
         assert result.returncode == 0
         assert result.stdout == expected
 
+    def test_positive_validate_needs_work(self):
+        """POSITIVE: validate with minor issues produces Needs Work rating."""
+        expected = (
+            "Overall: 🟡 Needs Work (57/100)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Experience         🟢  17/20  ⚠ Bullet points should start with strong action verbs (e.g. built, delivered, improved)\n"
+            "  Skills             🟢  20/20  \n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "needs_work.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
+
     @pytest.mark.skip(reason="Parser does not yet emit empty sections for missing required sections. "
                              "A resume missing Work Experience will not be penalised until the parser "
                              "populates a null/empty Section for required types not found in the text.")
