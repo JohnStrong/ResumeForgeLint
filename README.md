@@ -65,6 +65,10 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [ ] Maximum length (not too long)
 - [ ] Contains relevant keywords
 
+### References (optional, not scored)
+- Presence check only — not penalised if absent
+- Does not contribute to overall score
+
 ## Commands
 
 ### `validate`
