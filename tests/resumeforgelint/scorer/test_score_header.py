@@ -1,7 +1,7 @@
 import pytest
 
 from resumeforgelint.models import Section, SectionType, Severity
-from resumeforgelint.scorer.score_header import score_header, _contains_full_name_at_start, _contains_email, _contains_phone_number
+from resumeforgelint.scorer.score_header import score_header, _contains_full_name_at_start, _contains_email, _contains_phone_number, _contains_country_code
 
 
 def _make_header(content: list[str]) -> Section:
@@ -244,6 +244,15 @@ class TestScoreHeader:
         assert any("phone" in i.message.lower() for i in result.issues)
         assert any("country code" in i.message.lower() for i in result.issues)
 
+    def test_negative_phone_without_country_code_deducts_5_points(self):
+        """NEGATIVE: header with name, email, and phone but no country code deducts 5 points (warning)."""
+        section = _make_header(["John Smith", "john@email.com", "555-123-4567"])
+        result = score_header(section)
+        assert result.score == 15
+        assert len(result.issues) == 1
+        assert result.issues[0].severity == Severity.WARNING
+        assert "country code" in result.issues[0].message.lower()
+
     def test_negative_only_name_present(self):
         """NEGATIVE: header with name only, missing email, phone, and country code, clamps to 0."""
         section = _make_header(["John Smith", "London, UK"])
@@ -360,3 +369,55 @@ class TestContainsPhoneNumber:
         """NEGATIVE: number too short to be a phone is not detected."""
         section = _make_header(["John Smith", "12345"])
         assert _contains_phone_number(section) is False
+
+
+class TestContainsCountryCode:
+    def test_positive_plus_one(self):
+        """POSITIVE: +1 country code is detected."""
+        section = _make_header(["John Smith", "+1 555-123-4567"])
+        assert _contains_country_code(section) is True
+
+    def test_positive_plus_44(self):
+        """POSITIVE: +44 country code is detected."""
+        section = _make_header(["John Smith", "+44 7700 900000"])
+        assert _contains_country_code(section) is True
+
+    def test_positive_plus_353(self):
+        """POSITIVE: +353 three-digit country code is detected."""
+        section = _make_header(["John Smith", "+353 1 234 5678"])
+        assert _contains_country_code(section) is True
+
+    def test_positive_country_code_with_dash(self):
+        """POSITIVE: country code followed by dash separator is detected."""
+        section = _make_header(["John Smith", "+1-555-123-4567"])
+        assert _contains_country_code(section) is True
+
+    def test_positive_country_code_on_third_line(self):
+        """POSITIVE: country code on any line after the first is detected."""
+        section = _make_header(["John Smith", "john@email.com", "+44 7700 900000"])
+        assert _contains_country_code(section) is True
+
+    def test_negative_no_country_code(self):
+        """NEGATIVE: phone without country code returns False."""
+        section = _make_header(["John Smith", "555-123-4567"])
+        assert _contains_country_code(section) is False
+
+    def test_negative_empty_content(self):
+        """NEGATIVE: empty content returns False."""
+        section = _make_header([])
+        assert _contains_country_code(section) is False
+
+    def test_negative_plus_on_first_line(self):
+        """NEGATIVE: country code only on first line (name line) is not detected."""
+        section = _make_header(["+1 555-123-4567"])
+        assert _contains_country_code(section) is False
+
+    def test_negative_no_plus_prefix(self):
+        """NEGATIVE: digits without + prefix are not a country code."""
+        section = _make_header(["John Smith", "1-555-123-4567"])
+        assert _contains_country_code(section) is False
+
+    def test_negative_plus_without_separator(self):
+        """NEGATIVE: + followed by digits without a separator is not matched."""
+        section = _make_header(["John Smith", "+15551234567"])
+        assert _contains_country_code(section) is False
