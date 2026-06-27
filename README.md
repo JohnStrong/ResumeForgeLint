@@ -24,10 +24,9 @@ Simple ATS (application tracking system) Resume/C.V validation tool
     - Work Experience
     - Skills
     - Education
-  - Optional sections graded only if present:
-    - Profile/Summary
-    - References
   - Unrecognized sections (e.g. Projects, Volunteer Work, Certifications) are ignored and do not contribute to the score
+
+> **Note:** Profile/Summary and References are not scored in v1. Most ATS systems do not parse these sections for structured data, and modern best practice is to omit References entirely. They do not contribute to the score positively or negatively.
 
 ## Scoring Rubrics (Work in progress)
 
@@ -58,16 +57,6 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [x] Degree type present (BSc, MSc, PhD, etc.)
 - [x] Institution name present
 - [x] Graduation date present
-
-### Summary/Profile (optional, not scored)
-- Presence check only — not penalised if absent
-- Most ATS systems do not parse this section for structured data
-- Does not contribute to overall score
-
-### References (optional, not scored)
-- Presence check only — not penalised if absent
-- No ATS extracts or uses references data; modern best practice is to omit this section
-- Does not contribute to overall score
 
 ## Commands
 
