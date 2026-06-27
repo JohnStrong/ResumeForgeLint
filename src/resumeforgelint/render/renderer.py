@@ -1,11 +1,11 @@
 from resumeforgelint.models import ScoredSection, Issue, Severity
 from resumeforgelint.render.template_engine import TemplateEngine
 
-MAX_SCORE = 100
+SECTION_MAX_SCORE = 20
 
 _SEVERITY_ORDER = {Severity.CRITICAL: 0, Severity.WARNING: 1, Severity.INFO: 2}
 
-def _score_to_visual_rating(score: int, max_score: int = MAX_SCORE) -> tuple[str, str]:
+def _score_to_visual_rating(score: int, max_score: int) -> tuple[str, str]:
     normalized_score = score / max_score
     if normalized_score >= 0.8:
         return ("🟢", "Good")
@@ -27,11 +27,12 @@ def _transform_issues(issues: list[Issue], limit: int = 1) -> str:
 
 def _transform_summary(scored_sections: list[ScoredSection]) -> dict[str, str]:
     total_score = sum(s.score for s in scored_sections)
-    emoji, rating = _score_to_visual_rating(total_score)
-    return {"emoji": emoji, "rating": rating, "total": str(total_score)}
+    max_score = len(scored_sections) * SECTION_MAX_SCORE
+    emoji, rating = _score_to_visual_rating(total_score, max_score)
+    return {"emoji": emoji, "rating": rating, "total": str(total_score), "max": str(max_score)}
 
 def _transform_section(scored_section: ScoredSection) -> dict[str, str]:
-    emoji, _ = _score_to_visual_rating(scored_section.score, max_score=20)
+    emoji, _ = _score_to_visual_rating(scored_section.score, max_score=SECTION_MAX_SCORE)
     return {
         "name": scored_section.section.heading or "Header",
         "emoji": emoji,

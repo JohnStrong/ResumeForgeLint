@@ -14,27 +14,27 @@ from resumeforgelint.render.renderer import (
 class TestScoreToVisualRating:
     def test_positive_good_at_80(self):
         """POSITIVE: score of 80 returns green Good."""
-        assert _score_to_visual_rating(80) == ("🟢", "Good")
+        assert _score_to_visual_rating(80, 100) == ("🟢", "Good")
 
     def test_positive_good_at_100(self):
         """POSITIVE: perfect score returns green Good."""
-        assert _score_to_visual_rating(100) == ("🟢", "Good")
+        assert _score_to_visual_rating(100, 100) == ("🟢", "Good")
 
     def test_positive_needs_work_at_50(self):
         """POSITIVE: score of 50 returns yellow Needs Work."""
-        assert _score_to_visual_rating(50) == ("🟡", "Needs Work")
+        assert _score_to_visual_rating(50, 100) == ("🟡", "Needs Work")
 
     def test_positive_needs_work_at_79(self):
         """POSITIVE: score of 79 returns yellow Needs Work."""
-        assert _score_to_visual_rating(79) == ("🟡", "Needs Work")
+        assert _score_to_visual_rating(79, 100) == ("🟡", "Needs Work")
 
     def test_positive_poor_at_49(self):
         """POSITIVE: score of 49 returns red Poor."""
-        assert _score_to_visual_rating(49) == ("🔴", "Poor")
+        assert _score_to_visual_rating(49, 100) == ("🔴", "Poor")
 
     def test_positive_poor_at_0(self):
         """POSITIVE: score of 0 returns red Poor."""
-        assert _score_to_visual_rating(0) == ("🔴", "Poor")
+        assert _score_to_visual_rating(0, 100) == ("🔴", "Poor")
 
 
 class TestSeverityToIcon:
@@ -96,7 +96,7 @@ class TestTransformSummary:
             _make_scored_section("References", 16),
         ]
         result = _transform_summary(sections)
-        assert result == {"emoji": "🟢", "rating": "Good", "total": "88"}
+        assert result == {"emoji": "🟢", "rating": "Good", "total": "88", "max": "100"}
 
     def test_positive_poor_score(self):
         """POSITIVE: low total produces Poor rating props."""
@@ -108,7 +108,7 @@ class TestTransformSummary:
             _make_scored_section("References", 5),
         ]
         result = _transform_summary(sections)
-        assert result == {"emoji": "🔴", "rating": "Poor", "total": "25"}
+        assert result == {"emoji": "🔴", "rating": "Poor", "total": "25", "max": "100"}
 
 
 class TestTransformSection:

@@ -1,5 +1,5 @@
 
-SUMMARY = 'Overall: {emoji} {rating} ({total}/100)'
+SUMMARY = 'Overall: {emoji} {rating} ({total}/{max})'
 SECTION = '  {name:<18} {emoji}  {score:>2}/20  {issues}'
 
 class TemplateEngine:

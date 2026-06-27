@@ -8,5 +8,8 @@ Amazon - Senior Software Engineer
 Was responsible for backend systems
 Helped with distributed architecture
 
+Education
+Studied computer science for several years
+
 Skills
 Python, Java, AWS, Docker, Kubernetes
