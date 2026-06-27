@@ -136,13 +136,8 @@ class TestCli:
         assert result.returncode == 0
         assert result.stdout == expected
 
-    @pytest.mark.skip(reason="Parser does not yet emit empty sections for missing required sections. "
-                             "A resume missing Work Experience will not be penalised until the parser "
-                             "populates a null/empty Section for required types not found in the text.")
-    def test_negative_missing_required_section_still_scored(self):
-        """NEGATIVE: a resume missing a required section (e.g. Work Experience) should still
-        report it as scored with 0/20 in the output. Currently the parser only returns sections
-        it finds, so missing sections are silently ignored."""
-        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "good_header.txt"))
-        # Once fixed, a resume without Experience should show Experience 0/20
+    def test_positive_missing_required_section_still_scored(self):
+        """POSITIVE: a resume missing a required section (e.g. Work Experience) still
+        reports it as scored in the output since the parser populates empty sections."""
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_education.txt"))
         assert "Experience" in result.stdout
