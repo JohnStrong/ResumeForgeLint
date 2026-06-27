@@ -136,8 +136,16 @@ class TestCli:
         assert result.returncode == 0
         assert result.stdout == expected
 
-    def test_positive_missing_required_section_still_scored(self):
-        """POSITIVE: a resume missing a required section (e.g. Work Experience) still
-        reports it as scored in the output since the parser populates empty sections."""
-        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_education.txt"))
-        assert "Experience" in result.stdout
+    def test_positive_all_required_sections_scored_when_missing(self):
+        """POSITIVE: a resume with only a header still scores all required sections as 0/20."""
+        expected = (
+            "Overall: 🔴 Poor (20/80)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Experience         🔴   0/20  ✖ Work Experience section should not be empty\n"
+            "  Education          🔴   0/20  ✖ Education section should not be empty\n"
+            "  Skills             🔴   0/20  ✖ Skills section should not be empty\n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "header_only.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
