@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeForgeLint — ATS Resume Validation Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif; line-height: 1.6; color: #333; background: #fafafa; }
+        .header { background: linear-gradient(135deg, #1a7a5c, #2d9b6e); color: #fff; padding: 3rem 2rem; text-align: center; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header .subtitle { font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+        .header .companion { margin-top: 1rem; font-size: 0.9rem; opacity: 0.75; }
+        .header .companion a { color: #fff; text-decoration: underline; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+        h2 { color: #1a7a5c; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.4rem; margin: 2rem 0 1rem; font-size: 1.5rem; }
+        h3 { color: #444; margin: 1.5rem 0 0.5rem; font-size: 1.2rem; }
+        p { margin: 0.5rem 0; }
+        ul, ol { margin: 0.5rem 0 0.5rem 1.5rem; }
+        li { margin: 0.3rem 0; }
+        code { background: #f0f0f0; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 1rem 1.2rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; font-size: 0.85rem; line-height: 1.5; }
+        pre code { background: none; padding: 0; color: inherit; }
+        blockquote { border-left: 4px solid #2d9b6e; padding: 0.5rem 1rem; margin: 1rem 0; background: #f0faf5; }
+        a { color: #1a7a5c; }
+        .badge { display: inline-block; background: #2d9b6e; color: #fff; font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; }
+        .toc { background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1rem 1.5rem; margin: 1rem 0; }
+        .toc ul { list-style: none; margin: 0; padding: 0; }
+        .toc li { margin: 0.3rem 0; }
+        .toc a { text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .rubric-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .rubric-list li { padding: 0.3rem 0; padding-left: 1.5rem; position: relative; }
+        .rubric-list li::before { content: "☐"; position: absolute; left: 0; color: #999; }
+        .rubric-list li.done::before { content: "☑"; color: #2d9b6e; }
+        .footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; border-top: 1px solid #e0e0e0; margin-top: 3rem; }
+        .footer a { color: #1a7a5c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ResumeForgeLint</h1>
+        <p class="subtitle">ATS (Application Tracking System) resume validation &amp; compatibility tool. Lint your plain-text resume for ATS readability before you apply.</p>
+        <p class="companion">Companion to <a href="https://resume-forge-cli.web.app/">ResumeForge</a> — generate ATS-friendly styled PDFs from plain text</p>
+    </div>
+
+    <div class="container">
+        <nav class="toc">
+            <strong>Contents</strong>
+            <ul>
+                <li><a href="#features">Features (v1)</a></li>
+                <li><a href="#rubrics">Scoring Rubrics</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+        </nav>
+
+        <h2 id="features">Features (v1)</h2>
+        <ul>
+            <li><strong>Validate a resume provided as a <code>.txt</code> file</strong></li>
+            <li><strong>Fuzzy section heading detection</strong> using synonym sets (e.g., Experience/Work History/Employment; Education/Academics; Skills/Technical Skills)</li>
+            <li><strong>Per-section rubric scoring + issue reporting</strong>
+                <ul>
+                    <li>Shows which sections/signals were detected</li>
+                    <li>Lists issues with severity (critical/warning/info) and short "why" explanations</li>
+                </ul>
+            </li>
+            <li><strong>Human-readable output</strong> — summary of ATS risk + top issues per section</li>
+            <li><strong>Required-section expectations (baseline)</strong>
+                <ul>
+                    <li>Core sections expected (scored even if missing): Work Experience, Skills, Education</li>
+                    <li>Unrecognized sections (e.g. Projects, Volunteer Work, Certifications) are ignored and do not contribute to the score</li>
+                </ul>
+            </li>
+        </ul>
+        <blockquote>
+            <strong>Note:</strong> Profile/Summary and References are not scored in v1. Most ATS systems do not parse these sections for structured data, and modern best practice is to omit References entirely. They do not contribute to the score positively or negatively.
+        </blockquote>
+
+        <h2 id="rubrics">Scoring Rubrics</h2>
+
+        <h3>Header (20 points)</h3>
+        <ul class="rubric-list">
+            <li class="done">Full name present on first line</li>
+            <li class="done">Email address present</li>
+            <li class="done">Phone number present</li>
+            <li class="done">Phone number country code present (e.g. +1, +44)</li>
+            <li>LinkedIn URL present (optional, bonus)</li>
+        </ul>
+
+        <h3>Work Experience (20 points)</h3>
+        <ul class="rubric-list">
+            <li class="done">Section present</li>
+            <li class="done">Quantified achievements (numbers, percentages, metrics)</li>
+            <li class="done">Action verbs at start of bullet points</li>
+            <li class="done">Date ranges present for each role</li>
+            <li class="done">Company and role title present</li>
+        </ul>
+
+        <h3>Skills (20 points)</h3>
+        <ul class="rubric-list">
+            <li class="done">Section present</li>
+            <li class="done">Contains keywords (technical terms, tools, languages)</li>
+            <li class="done">Minimum keyword count threshold</li>
+            <li class="done">No excessive soft-skill filler</li>
+        </ul>
+
+        <h3>Education (20 points)</h3>
+        <ul class="rubric-list">
+            <li class="done">Section present</li>
+            <li class="done">Degree type present (BSc, MSc, PhD, etc.)</li>
+            <li class="done">Institution name present</li>
+            <li class="done">Graduation date present</li>
+        </ul>
+
+        <h2 id="commands">Commands</h2>
+
+        <h3><code>validate</code></h3>
+        <p>Analyse a <code>.txt</code> resume, score each section, and print a summary report.</p>
+        <pre><code>resumeforgelint validate --input resume.txt</code></pre>
+
+        <p><strong>What it does:</strong></p>
+        <ol>
+            <li>Reads the plain-text resume</li>
+            <li>Detects sections via fuzzy heading matching (synonym sets)</li>
+            <li>Scores each section and flags issues (critical / warning / info)</li>
+            <li>Prints a summary to stdout:
+                <ul>
+                    <li>Overall rating (🟢 Good / 🟡 Needs Work / 🔴 Poor)</li>
+                    <li>Per-section breakdown with score and top issue</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h2 id="examples">Examples</h2>
+
+        <h3>Good resume</h3>
+        <p>All required sections present with complete information. Scores 80/80 (100%).</p>
+        <pre><code>$ resumeforgelint validate --input examples/good_header.txt</code></pre>
+        <pre><code>Overall: 🟢 Good (80/80)
+
+  Header             🟢  20/20
+  Experience         🟢  20/20
+  Education          🟢  20/20
+  Skills             🟢  20/20</code></pre>
+
+        <h3>Needs Work</h3>
+        <p>Has all sections but Education is missing degree type and institution. Experience lacks action verbs. Scores 62/80 (77%).</p>
+        <pre><code>$ resumeforgelint validate --input examples/needs_work.txt</code></pre>
+        <pre><code>Overall: 🟡 Needs Work (62/80)
+
+  Header             🟢  20/20
+  Experience         🟢  17/20  ⚠ Bullet points should start with strong action verbs
+  Education          🔴   5/20  ✖ Education should include a degree type (e.g. BSc, MSc, PhD)
+  Skills             🟢  20/20</code></pre>
+
+        <h3>Poor resume</h3>
+        <p>Missing name in header, no company/role or dates in experience, no technical keywords in skills, and no education section content. Scores 8/80 (10%).</p>
+        <pre><code>$ resumeforgelint validate --input examples/bad_all.txt</code></pre>
+        <pre><code>Overall: 🔴 Poor (8/80)
+
+  Header             🔴   0/20  ✖ Resume should contain the applicants full name
+  Experience         🔴   0/20  ✖ Each role should include company name and role title
+  Skills             🔴   8/20  ✖ Skills section should contain technical keywords
+  Education          🔴   0/20  ✖ Education section should not be empty</code></pre>
+    </div>
+
+    <div class="footer">
+        <p>MIT License © 2026 John Joseph Strong</p>
+        <p>Built with Python · Companion to <a href="https://resume-forge-cli.web.app/">ResumeForge</a></p>
+    </div>
+</body>
+</html>
