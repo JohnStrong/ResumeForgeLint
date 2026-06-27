@@ -136,20 +136,75 @@ class TestParse:
             parse(None)
 
     def test_negative_no_recognized_sections(self):
-        """NEGATIVE: text with no recognized headings returns only the header section."""
+        """NEGATIVE: text with no recognized headings returns header plus required empty sections."""
         text = "John Doe\njohn@email.com\nSome random content"
         sections = parse(text)
 
-        assert len(sections) == 1
         assert sections[0].section_type == SectionType.HEADER
         assert sections[0].heading is None
+        # Required sections are added with empty content
+        types = {s.section_type for s in sections}
+        assert SectionType.EXPERIENCE in types
+        assert SectionType.EDUCATION in types
+        assert SectionType.SKILLS in types
 
     def test_negative_heading_embedded_in_sentence(self):
         """NEGATIVE: heading keywords inside sentences are not matched as boundaries."""
         text = "Name\n\nExperience\nI have experience in skills development"
         sections = parse(text)
 
-        # "skills development" should NOT create a new Skills section
-        assert not any(
-            s.section_type == SectionType.SKILLS for s in sections
-        )
+        # "skills development" should NOT create a Skills section with content
+        skills_sections = [s for s in sections if s.section_type == SectionType.SKILLS]
+        assert all(s.content == [] for s in skills_sections)
+
+
+class TestRequiredSections:
+    def test_positive_missing_experience_added(self):
+        """POSITIVE: missing Experience section is added with empty content."""
+        text = "John Smith\njohn@email.com\n\nSkills\nPython\n\nEducation\nBSc"
+        sections = parse(text)
+        exp = next(s for s in sections if s.section_type == SectionType.EXPERIENCE)
+        assert exp.content == []
+        assert exp.heading == "Experience"
+
+    def test_positive_missing_education_added(self):
+        """POSITIVE: missing Education section is added with empty content."""
+        text = "John Smith\njohn@email.com\n\nExperience\nAmazon - SDE\n\nSkills\nPython"
+        sections = parse(text)
+        edu = next(s for s in sections if s.section_type == SectionType.EDUCATION)
+        assert edu.content == []
+        assert edu.heading == "Education"
+
+    def test_positive_missing_skills_added(self):
+        """POSITIVE: missing Skills section is added with empty content."""
+        text = "John Smith\njohn@email.com\n\nExperience\nAmazon - SDE\n\nEducation\nBSc"
+        sections = parse(text)
+        skills = next(s for s in sections if s.section_type == SectionType.SKILLS)
+        assert skills.content == []
+        assert skills.heading == "Skills"
+
+    def test_positive_header_always_present(self):
+        """POSITIVE: header is always present (implicit first section)."""
+        text = "John Smith\n\nExperience\nAmazon\n\nSkills\nPython\n\nEducation\nBSc"
+        sections = parse(text)
+        header = next(s for s in sections if s.section_type == SectionType.HEADER)
+        assert header is not None
+
+    def test_positive_all_present_no_duplicates(self):
+        """POSITIVE: when all required sections exist, no duplicates are added."""
+        text = "John Smith\n\nExperience\nAmazon\n\nEducation\nBSc\n\nSkills\nPython"
+        sections = parse(text)
+        types = [s.section_type for s in sections]
+        assert types.count(SectionType.EXPERIENCE) == 1
+        assert types.count(SectionType.EDUCATION) == 1
+        assert types.count(SectionType.SKILLS) == 1
+        assert types.count(SectionType.HEADER) == 1
+
+    def test_positive_missing_multiple_required_sections(self):
+        """POSITIVE: multiple missing required sections are all added."""
+        text = "John Smith\njohn@email.com"
+        sections = parse(text)
+        types = {s.section_type for s in sections}
+        assert SectionType.EXPERIENCE in types
+        assert SectionType.EDUCATION in types
+        assert SectionType.SKILLS in types

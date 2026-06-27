@@ -69,10 +69,12 @@ class TestCli:
     def test_positive_validate_bad_experience(self):
         """POSITIVE: validate with bad experience section reports issues."""
         expected = (
-            "Overall: 🟡 Needs Work (20/40)\n"
+            "Overall: 🔴 Poor (20/80)\n"
             "\n"
             "  Header             🟢  20/20  \n"
             "  Experience         🔴   0/20  ✖ Each role should include company name and role title\n"
+            "  Education          🔴   0/20  ✖ Education section should not be empty\n"
+            "  Skills             🔴   0/20  ✖ Skills section should not be empty\n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_experience.txt"))
         assert result.returncode == 0
@@ -81,10 +83,12 @@ class TestCli:
     def test_positive_validate_bad_skills(self):
         """POSITIVE: validate with bad skills section reports issues."""
         expected = (
-            "Overall: 🟡 Needs Work (28/40)\n"
+            "Overall: 🔴 Poor (28/80)\n"
             "\n"
             "  Header             🟢  20/20  \n"
             "  Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)\n"
+            "  Experience         🔴   0/20  ✖ Work Experience section should not be empty\n"
+            "  Education          🔴   0/20  ✖ Education section should not be empty\n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_skills.txt"))
         assert result.returncode == 0
@@ -93,11 +97,12 @@ class TestCli:
     def test_positive_validate_bad_all_sections(self):
         """POSITIVE: validate with multiple bad sections reports top issue per section."""
         expected = (
-            "Overall: 🔴 Poor (8/60)\n"
+            "Overall: 🔴 Poor (8/80)\n"
             "\n"
             "  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document\n"
             "  Experience         🔴   0/20  ✖ Each role should include company name and role title\n"
             "  Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)\n"
+            "  Education          🔴   0/20  ✖ Education section should not be empty\n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_all.txt"))
         assert result.returncode == 0
@@ -106,10 +111,12 @@ class TestCli:
     def test_positive_validate_bad_education(self):
         """POSITIVE: validate with bad education section reports issues."""
         expected = (
-            "Overall: 🟡 Needs Work (25/40)\n"
+            "Overall: 🔴 Poor (25/80)\n"
             "\n"
             "  Header             🟢  20/20  \n"
             "  Education          🔴   5/20  ✖ Education should include a degree type (e.g. BSc, MSc, PhD)\n"
+            "  Experience         🔴   0/20  ✖ Work Experience section should not be empty\n"
+            "  Skills             🔴   0/20  ✖ Skills section should not be empty\n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_education.txt"))
         assert result.returncode == 0

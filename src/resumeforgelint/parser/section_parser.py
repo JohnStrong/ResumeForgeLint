@@ -8,6 +8,8 @@ _SYNONYMS: dict[SectionType, list[str]] = {
     SectionType.REFERENCES: ["references"],
 }
 
+_REQUIRED_SECTIONS: list[SectionType] = [SectionType.HEADER, SectionType.EXPERIENCE, SectionType.EDUCATION, SectionType.SKILLS]
+
 def _match_heading(line: str) -> SectionType | None:
     normalized = line.strip().lower()
     for section_type, synonyms in _SYNONYMS.items():
@@ -37,4 +39,11 @@ def parse(resume_text: str) -> list[Section]:
             current_content.append(line)
 
     sections.append(Section(current_type, current_heading, current_content))
+
+    found_types = {s.section_type for s in sections}
+    for required_section_type in _REQUIRED_SECTIONS:
+        if required_section_type not in found_types:
+            heading = required_section_type.value.capitalize()
+            sections.append(Section(required_section_type, heading, []))
+
     return sections
