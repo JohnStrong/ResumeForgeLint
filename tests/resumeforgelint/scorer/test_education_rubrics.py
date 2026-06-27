@@ -122,3 +122,20 @@ class TestHasGraduationDate:
         """NEGATIVE: empty content fails."""
         section = _make_education([])
         assert _has_graduation_date(section) is False
+
+
+class TestMultiLineEducation:
+    def test_positive_degree_on_separate_line(self):
+        """POSITIVE: degree type on its own line is detected."""
+        section = _make_education(["BSc Computer Science", "University of Edinburgh", "2016"])
+        assert _has_degree_type(section) is True
+
+    def test_positive_institution_on_separate_line(self):
+        """POSITIVE: institution on its own line is detected."""
+        section = _make_education(["BSc Computer Science", "University of Edinburgh", "2016"])
+        assert _has_institution(section) is True
+
+    def test_positive_graduation_date_on_separate_line(self):
+        """POSITIVE: graduation date on its own line is detected."""
+        section = _make_education(["BSc Computer Science", "University of Edinburgh", "2016"])
+        assert _has_graduation_date(section) is True
