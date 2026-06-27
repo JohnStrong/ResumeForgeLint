@@ -59,7 +59,7 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [x] Institution name present
 - [x] Graduation date present
 
-### Summary/Profile (20 points)
+### Summary/Profile (optional, 20 points)
 - [ ] Section present
 - [ ] Minimum length (not too short)
 - [ ] Maximum length (not too long)
