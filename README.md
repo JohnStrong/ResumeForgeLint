@@ -59,14 +59,14 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 - [x] Institution name present
 - [x] Graduation date present
 
-### Summary/Profile (optional, 20 points)
-- [ ] Section present
-- [ ] Minimum length (not too short)
-- [ ] Maximum length (not too long)
-- [ ] Contains relevant keywords
+### Summary/Profile (optional, not scored)
+- Presence check only — not penalised if absent
+- Most ATS systems do not parse this section for structured data
+- Does not contribute to overall score
 
 ### References (optional, not scored)
 - Presence check only — not penalised if absent
+- No ATS extracts or uses references data; modern best practice is to omit this section
 - Does not contribute to overall score
 
 ## Commands
