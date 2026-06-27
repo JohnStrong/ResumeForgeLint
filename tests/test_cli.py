@@ -64,6 +64,43 @@ class TestCli:
         assert result.returncode == 1
         assert "not found" in result.stdout
 
+    def test_positive_validate_bad_experience(self):
+        """POSITIVE: validate with bad experience section reports issues."""
+        expected = (
+            "Overall: 🔴 Poor (20/100)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Experience         🔴   0/20  ✖ Each role should include company name and role title\n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_experience.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
+
+    def test_positive_validate_bad_skills(self):
+        """POSITIVE: validate with bad skills section reports issues."""
+        expected = (
+            "Overall: 🔴 Poor (28/100)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)\n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_skills.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
+
+    def test_positive_validate_bad_all_sections(self):
+        """POSITIVE: validate with multiple bad sections reports top issue per section."""
+        expected = (
+            "Overall: 🔴 Poor (8/100)\n"
+            "\n"
+            "  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document\n"
+            "  Experience         🔴   0/20  ✖ Each role should include company name and role title\n"
+            "  Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)\n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_all.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
+
     @pytest.mark.skip(reason="Parser does not yet emit empty sections for missing required sections. "
                              "A resume missing Work Experience will not be penalised until the parser "
                              "populates a null/empty Section for required types not found in the text.")
