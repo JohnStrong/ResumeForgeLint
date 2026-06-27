@@ -24,10 +24,11 @@ class TestCli:
     def test_positive_validate_good_header(self):
         """POSITIVE: validate with good header and experience produces expected output."""
         expected = (
-            "Overall: 🟡 Needs Work (60/100)\n"
+            "Overall: 🟢 Good (80/100)\n"
             "\n"
             "  Header             🟢  20/20  \n"
             "  Experience         🟢  20/20  \n"
+            "  Education          🟢  20/20  \n"
             "  Skills             🟢  20/20  \n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "good_header.txt"))
@@ -37,10 +38,11 @@ class TestCli:
     def test_positive_validate_bad_header(self):
         """POSITIVE: validate with bad header resume produces expected output."""
         expected = (
-            "Overall: 🔴 Poor (40/100)\n"
+            "Overall: 🟡 Needs Work (60/100)\n"
             "\n"
             "  Header             🔴   0/20  ✖ A Resume should contain the applicants full name at the start (top) of the document\n"
             "  Experience         🟢  20/20  \n"
+            "  Education          🟢  20/20  \n"
             "  Skills             🟢  20/20  \n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_header.txt"))
@@ -98,6 +100,18 @@ class TestCli:
             "  Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)\n"
         )
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_all.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
+
+    def test_positive_validate_bad_education(self):
+        """POSITIVE: validate with bad education section reports issues."""
+        expected = (
+            "Overall: 🔴 Poor (25/100)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Education          🔴   5/20  ✖ Education should include a degree type (e.g. BSc, MSc, PhD)\n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "bad_education.txt"))
         assert result.returncode == 0
         assert result.stdout == expected
 

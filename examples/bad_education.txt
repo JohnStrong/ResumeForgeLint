@@ -1,0 +1,6 @@
+John Smith
+john@email.com
++1 555-123-4567
+
+Education
+Studied computer science for a few years
