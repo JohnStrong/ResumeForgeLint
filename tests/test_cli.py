@@ -163,3 +163,19 @@ class TestCli:
         result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "no_header.txt"))
         assert result.returncode == 0
         assert result.stdout == expected
+
+    def test_positive_optional_sections_ignored(self):
+        """POSITIVE: optional sections (Summary, References) are not scored or shown in output."""
+        expected = (
+            "Overall: 🟢 Good (80/80)\n"
+            "\n"
+            "  Header             🟢  20/20  \n"
+            "  Experience         🟢  20/20  \n"
+            "  Education          🟢  20/20  \n"
+            "  Skills             🟢  20/20  \n"
+        )
+        result = _run_cli("validate", "--input", str(EXAMPLES_DIR / "with_optional_sections.txt"))
+        assert result.returncode == 0
+        assert result.stdout == expected
+        assert "Summary" not in result.stdout
+        assert "References" not in result.stdout
