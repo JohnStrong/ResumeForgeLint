@@ -5,3 +5,6 @@ dist/
 build/
 .venv/
 .pytest_cache/
+.firebase/
+.coverage
+mise.toml
