@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resumeforgelint"
-version = "0.1.0"
+version = "0.1.1"
 description = "Simple ATS Resume/C.V validation tool"
 requires-python = ">=3.10"
 license = "MIT"
