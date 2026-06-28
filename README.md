@@ -1,5 +1,5 @@
 # ResumeForgeLint
-![version](https://img.shields.io/badge/version-0.1.0-blue) ![build](https://img.shields.io/badge/build-passing-brightgreen) ![coverage](https://codecov.io/gh/JohnStrong/ResumeForgeLint/branch/main/graph/badge.svg) ![python](https://img.shields.io/badge/python-3.10+-yellow) ![license](https://img.shields.io/badge/license-MIT-green)
+![version](https://img.shields.io/badge/version-0.1.0-blue) ![build](https://github.com/JohnStrong/ResumeForgeLint/actions/workflows/python-app.yml/badge.svg) ![coverage](https://codecov.io/gh/JohnStrong/ResumeForgeLint/branch/main/graph/badge.svg) ![python](https://img.shields.io/badge/python-3.10+-yellow) ![license](https://img.shields.io/badge/license-MIT-green)
 
 Simple ATS (application tracking system) Resume/C.V validation tool
 
