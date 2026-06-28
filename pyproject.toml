@@ -8,7 +8,13 @@ version = "0.1.0"
 description = "Simple ATS Resume/C.V validation tool"
 requires-python = ">=3.10"
 license = "MIT"
+readme = "README.md"
 dependencies = []
+
+[project.urls]
+Homepage = "https://resume-forge-lint.web.app/"
+Repository = "https://github.com/JohnStrong/ResumeForgeLint"
+Documentation = "https://resume-forge-lint.web.app/"
 
 [project.scripts]
 resumeforgelint = "resumeforgelint.cli:main"
