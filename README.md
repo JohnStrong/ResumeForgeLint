@@ -25,6 +25,8 @@ Requires Python 3.10+.
 - [Scoring Rubrics](#scoring-rubrics-work-in-progress)
 - [Commands](#commands)
   - [`validate`](#validate)
+- [Testing](#testing)
+  - [Fidelity Tests](#fidelity-tests)
 
 ## Features (v1)
 
@@ -155,4 +157,27 @@ Overall: 🔴 Poor (8/80)
   Experience         🔴   0/20  ✖ Each role should include company name and role title
   Skills             🔴   8/20  ✖ Skills section should contain technical keywords (tools, languages, frameworks)
   Education          🔴   0/20  ✖ Education section should not be empty
+```
+
+## Testing
+
+Run the full test suite:
+
+```bash
+pytest
+```
+
+### Fidelity Tests
+
+Fidelity tests compare our rubric scoring against independent spaCy NER extraction. They assert that when spaCy can extract structured data (name, email, org, dates, degree), our tool scores that section as passing — and when spaCy cannot extract it, our tool flags it as an issue.
+
+```bash
+pytest fidelity_tests/
+```
+
+Requires spaCy:
+
+```bash
+pip install spacy
+python -m spacy download en_core_web_sm
 ```
