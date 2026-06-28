@@ -10,6 +10,12 @@ Simple ATS (application tracking system) Resume/C.V validation tool
 ## Installation
 
 ```bash
+pip install resumeforgelint
+```
+
+Or install from source:
+
+```bash
 git clone git@github.com:JohnStrong/ResumeForgeLint.git
 cd ResumeForgeLint
 python3 -m venv .venv
