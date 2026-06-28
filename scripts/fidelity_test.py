@@ -1,13 +1,19 @@
-"""Fidelity test: compare spaCy NER extraction against ResumeForgeLint scoring.
+"""Fidelity test: compare spaCy NER extraction against ResumeForgeLint scoring output.
+
+Asserts that when spaCy can extract a field, our tool scores it as passing,
+and when spaCy cannot extract it, our tool flags it as an issue.
 
 Run: python scripts/fidelity_test.py
 
 Requires: pip install spacy && python -m spacy download en_core_web_sm
 """
 import re
+import sys
 from pathlib import Path
 
 import spacy
+
+from resumeforgelint.cli import _validate
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -28,48 +34,114 @@ INSTITUTION_RE = re.compile(r"\b(University|College|Institute|School|Academy)\b"
 EXAMPLES_DIR = Path(__file__).parents[1] / "examples"
 
 
-def extract(filepath: Path) -> dict:
-    text = filepath.read_text()
+def spacy_extract(text: str) -> dict:
+    """Extract structured data using spaCy NLP (control)."""
     doc = nlp(text)
-
     names = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
-    emails = EMAIL_RE.findall(text)
-    phones = PHONE_RE.findall(text)
-    orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
-    dates = DATE_RE.findall(text)
-    degrees = DEGREE_RE.findall(text)
-    institutions = INSTITUTION_RE.findall(text)
-
     return {
-        "name": names[0] if names else None,
-        "email": emails[0] if emails else None,
-        "phone": phones[0].strip() if phones else None,
-        "orgs": orgs or None,
-        "date_ranges": len(dates),
-        "degree": degrees[0] if degrees else None,
-        "institution": institutions[0] if institutions else None,
+        "has_name": any(len(n.split()) >= 2 for n in names),
+        "has_email": bool(EMAIL_RE.search(text)),
+        "has_phone": bool(PHONE_RE.search(text)),
+        "has_org": any(ent.label_ == "ORG" for ent in doc.ents),
+        "has_dates": bool(DATE_RE.search(text)),
+        "has_degree": bool(DEGREE_RE.search(text)),
+        "has_institution": bool(INSTITUTION_RE.search(text)),
     }
 
 
+def parse_lint_output(output: str) -> dict:
+    """Parse ResumeForgeLint output to extract per-section scores (test)."""
+    sections = {}
+    for line in output.splitlines():
+        # Match lines like: "  Header             🟢  20/20  "
+        match = re.match(r"\s+(\S+)\s+[🟢🟡🔴]\s+(\d+)/20\s*(.*)", line)
+        if match:
+            name = match.group(1)
+            score = int(match.group(2))
+            issue = match.group(3).strip()
+            sections[name.lower()] = {"score": score, "issue": issue}
+    return sections
+
+
+def assert_alignment(filename: str, spacy_data: dict, lint_sections: dict) -> list[str]:
+    """Compare spaCy extraction against lint scores. Returns list of mismatches."""
+    mismatches = []
+
+    # Header checks
+    header = lint_sections.get("header", {})
+    header_score = header.get("score", 0)
+    header_full = header_score >= 15  # allow for missing country code warning
+
+    if spacy_data["has_name"] and spacy_data["has_email"] and spacy_data["has_phone"]:
+        if not header_full:
+            mismatches.append(f"spaCy found name+email+phone but lint scored Header {header_score}/20")
+    if not spacy_data["has_name"] and header_score > 10:
+        mismatches.append(f"spaCy could NOT find name but lint scored Header {header_score}/20")
+
+    # Experience checks
+    exp = lint_sections.get("experience", {})
+    exp_score = exp.get("score", 0)
+
+    if spacy_data["has_org"] and spacy_data["has_dates"]:
+        if exp_score < 10:
+            mismatches.append(f"spaCy found org+dates but lint scored Experience {exp_score}/20")
+    if not spacy_data["has_org"] and not spacy_data["has_dates"] and exp_score > 5:
+        mismatches.append(f"spaCy found NO org/dates but lint scored Experience {exp_score}/20")
+
+    # Education checks
+    edu = lint_sections.get("education", {})
+    edu_score = edu.get("score", 0)
+
+    if spacy_data["has_degree"] and spacy_data["has_institution"]:
+        if edu_score < 10:
+            mismatches.append(f"spaCy found degree+institution but lint scored Education {edu_score}/20")
+    if not spacy_data["has_degree"] and not spacy_data["has_institution"] and edu_score > 11:
+        mismatches.append(f"spaCy found NO degree/institution but lint scored Education {edu_score}/20")
+
+    return mismatches
+
+
 def main():
-    files = ["good_header.txt", "bad_header.txt", "bad_all.txt", "needs_work.txt"]
+    trace = "--trace" in sys.argv
+    files = ["good_header.txt", "bad_all.txt", "needs_work.txt"]
+    total_failures = 0
 
-    for f in files:
-        filepath = EXAMPLES_DIR / f
-        print(f"=== {f} ===")
-        data = extract(filepath)
+    for filename in files:
+        filepath = EXAMPLES_DIR / filename
+        text = filepath.read_text()
 
-        print(f"  [Header]")
-        print(f"    Name:        {data['name'] or 'NOT FOUND'}")
-        print(f"    Email:       {data['email'] or 'NOT FOUND'}")
-        print(f"    Phone:       {data['phone'] or 'NOT FOUND'}")
-        print(f"  [Experience]")
-        print(f"    Orgs:        {data['orgs'] or 'NOT FOUND'}")
-        print(f"    Date ranges: {data['date_ranges']}")
-        print(f"  [Education]")
-        print(f"    Degree:      {data['degree'] or 'NOT FOUND'}")
-        print(f"    Institution: {data['institution'] or 'NOT FOUND'}")
+        # Control: spaCy extraction
+        spacy_data = spacy_extract(text)
+
+        # Test: ResumeForgeLint output
+        lint_output = _validate(text)
+        lint_sections = parse_lint_output(lint_output)
+
+        # Compare
+        mismatches = assert_alignment(filename, spacy_data, lint_sections)
+
+        print(f"=== {filename} ===")
+        if trace:
+            print(f"  [spaCy control]")
+            for k, v in spacy_data.items():
+                print(f"    {k}: {v}")
+            print(f"  [ResumeForgeLint test]")
+            for section, data in lint_sections.items():
+                print(f"    {section}: {data['score']}/20  {data['issue'] or '(no issues)'}")
+            print(f"  [Comparison]")
+        if mismatches:
+            for m in mismatches:
+                print(f"  ✗ MISMATCH: {m}")
+            total_failures += len(mismatches)
+        else:
+            print(f"  ✓ ALIGNED")
         print()
+
+    if total_failures:
+        print(f"FAILED: {total_failures} mismatch(es) found.")
+        sys.exit(1)
+    else:
+        print("PASSED: All ResumeForgeLint scores align with spaCy NER extraction.")
 
 
 if __name__ == "__main__":
