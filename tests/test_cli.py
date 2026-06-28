@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+from resumeforgelint.cli import _validate, _parse_args
+
 EXAMPLES_DIR = Path(__file__).parents[1] / "examples"
 
 
@@ -50,9 +52,10 @@ class TestCli:
         assert result.stdout == expected
 
     def test_negative_no_command(self):
-        """NEGATIVE: no command prints help and exits 1."""
+        """NEGATIVE: no command prints help and exits 0."""
         result = _run_cli()
-        assert result.returncode == 1
+        assert result.returncode == 0
+        assert "validate" in result.stdout
 
     def test_negative_validate_missing_input(self):
         """NEGATIVE: validate without --input exits 2."""
@@ -179,3 +182,52 @@ class TestCli:
         assert result.stdout == expected
         assert "Summary" not in result.stdout
         assert "References" not in result.stdout
+
+
+class TestParseArgs:
+    def test_positive_validate_command(self):
+        """POSITIVE: validate command with --input is parsed correctly."""
+        args = _parse_args(["validate", "--input", "resume.txt"])
+        assert args.command == "validate"
+        assert args.input == "resume.txt"
+
+    def test_negative_no_command(self):
+        """NEGATIVE: no arguments results in command=None."""
+        args = _parse_args([])
+        assert args.command is None
+
+    def test_negative_validate_missing_input(self):
+        """NEGATIVE: validate without --input raises SystemExit."""
+        with pytest.raises(SystemExit):
+            _parse_args(["validate"])
+
+
+class TestValidate:
+    def test_positive_good_resume(self):
+        """POSITIVE: good resume text returns full score output."""
+        text = (EXAMPLES_DIR / "good_header.txt").read_text()
+        result = _validate(text)
+        assert "80/80" in result
+        assert "Header" in result
+        assert "Experience" in result
+
+    def test_positive_bad_resume(self):
+        """POSITIVE: bad resume text returns issues in output."""
+        text = (EXAMPLES_DIR / "bad_all.txt").read_text()
+        result = _validate(text)
+        assert "Poor" in result
+        assert "✖" in result
+
+    def test_positive_empty_sections_scored(self):
+        """POSITIVE: resume with only header still scores missing required sections."""
+        text = (EXAMPLES_DIR / "header_only.txt").read_text()
+        result = _validate(text)
+        assert "Experience" in result
+        assert "Education" in result
+        assert "Skills" in result
+        assert "0/20" in result
+
+    def test_negative_empty_text_raises(self):
+        """NEGATIVE: empty text raises ValueError."""
+        with pytest.raises(ValueError):
+            _validate("")

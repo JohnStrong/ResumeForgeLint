@@ -8,18 +8,30 @@ from resumeforgelint.scorer import MAPPER
 from resumeforgelint.render.renderer import render
 
 
-def main():
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="resumeforgelint", description="ATS Resume validation tool")
     subparsers = parser.add_subparsers(dest="command")
 
     validate_parser = subparsers.add_parser("validate", help="Validate a plain-text resume")
     validate_parser.add_argument("--input", required=True, help="Path to .txt resume file")
 
-    args = parser.parse_args()
+    return parser.parse_args(argv)
+
+
+def _validate(text: str) -> str:
+    sections = parse(text)
+    scored_sections = []
+    for section in sections:
+        if section.section_type in MAPPER:
+            scored_sections.append(score(section, MAPPER[section.section_type]))
+    return render(scored_sections) if scored_sections else ""
+
+
+def main():
+    args = _parse_args()
 
     if args.command is None:
-        parser.print_help()
-        sys.exit(1)
+        _parse_args(["--help"])  # prints help, exits 0 via argparse
 
     if args.command == "validate":
         input_path = Path(args.input)
@@ -28,13 +40,4 @@ def main():
             sys.exit(1)
 
         text = input_path.read_text()
-        sections = parse(text)
-
-        # Score each section (only header scorer implemented for now)
-        scored_sections = []
-        for section in sections:
-            if section.section_type in MAPPER:
-                scored_sections.append(score(section, MAPPER[section.section_type]))
-
-        if scored_sections:
-            print(render(scored_sections))
+        print(_validate(text))
